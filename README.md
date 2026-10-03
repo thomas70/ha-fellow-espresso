@@ -4,6 +4,10 @@ Unofficial integration for the Fellow Espresso Series 1 (ES1), using
 Fellow's cloud API. It polls every 60 seconds and runs alongside the Fellow
 Aiden integration without conflict (separate domain: `fellow_espresso`).
 
+> Not affiliated with or endorsed by Fellow. Built with
+> [Claude](https://claude.ai) by someone who doesn't code, so issues and pull
+> requests are very welcome.
+
 ## Install
 
 ### HACS
@@ -26,8 +30,8 @@ restart Home Assistant and add the integration as in step 4.
 | Descale interval | `descaleRem` | Configured interval, e.g. every 200 drinks (diagnostic) |
 | Backflush interval | `backflushRem` | Configured interval, e.g. every 60 shots (diagnostic) |
 | Shower screen clean interval | `showerRem` | Configured interval (diagnostic) |
-| **Profile** (select) | `PATCH /active-profile` | Switch the active profile: built-in ones (Classic 9-Bar, Lever, Modern Arc) and your own/Drops profiles |
-| Active profile | `activeProfileId` | Profile title, with dose/ratio/temp/grind as attributes. Built-in profiles shown by name |
+| **Profile** (select) | `PATCH /active-profile` | Switch the active profile: Fellow's built-in profiles (Light/Medium/Dark roast, Classic 9 bar, Lever, Modern arc, Turbo shot) and your Drops profiles |
+| Active profile | `activeProfileId` | Profile name, with dose/ratio/temp/grind as attributes |
 | Profiles | `/profiles` | Number of profiles; full list as an attribute |
 | Connected | `isConnected` | Whether the machine is online in Fellow's cloud |
 | Firmware upgrade required | `firmwareUpgradeRequired` | |
@@ -59,7 +63,9 @@ or mitmproxy) while using those features would show which.
 Despite their names, `descaleRem`, `backflushRem` and `showerRem` are the
 *intervals* set on the machine (Maintenance → Cleaning interval), not countdowns.
 The machine's progress toward them (e.g. "33/200 drinks") is not sent to the
-cloud, so maintenance-due alerts are not possible yet.
+cloud, and neither are individual shots, so maintenance-due alerts are not
+possible from this integration alone. A power-monitoring smart plug could be
+used to count shots in Home Assistant instead.
 
 The API has a `missingWater` field, but it stays `null` even with an empty tank,
 so there is no water tank sensor.
