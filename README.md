@@ -64,9 +64,10 @@ cloud, so maintenance-due alerts are not possible yet.
 The API has a `missingWater` field, but it stays `null` even with an empty tank,
 so there is no water tank sensor.
 
-Built-in profiles do not appear in the profiles endpoint. The ones seen so far
-are listed in `profiles.py`; any other built-in id the machine reports as active
-is added to the selector automatically (with a name derived from the id).
+The profiles endpoint may also return Fellow's built-in profiles; their API
+titles are used when present. `profiles.py` holds fallback names for built-in
+ids seen so far, and any other id the machine reports as active is added to the
+selector automatically.
 
 ## Tests
 
