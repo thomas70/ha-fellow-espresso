@@ -1,0 +1,38 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Fellow Espresso Series 1",
+        "description": "Logg inn med Fellow-kontoen din.",
+        "data": {
+          "email": "E-post",
+          "password": "Passord"
+        }
+      },
+      "pick": {
+        "title": "Velg maskin",
+        "data": {
+          "device_id": "Maskin"
+        }
+      },
+      "reauth_confirm": {
+        "title": "Logg inn på nytt",
+        "description": "Fellow avviste den lagrede innloggingen. Skriv inn opplysningene på nytt.",
+        "data": {
+          "email": "E-post",
+          "password": "Passord"
+        }
+      }
+    },
+    "error": {
+      "auth": "Feil e-post eller passord.",
+      "cannot_connect": "Fikk ikke kontakt med Fellows servere.",
+      "no_devices": "Fant ingen Espresso Series 1 på denne kontoen.",
+      "unknown": "Uventet feil, se loggen."
+    },
+    "abort": {
+      "already_configured": "Denne maskinen er allerede satt opp.",
+      "reauth_successful": "Innloggingen er oppdatert."
+    }
+  }
+}

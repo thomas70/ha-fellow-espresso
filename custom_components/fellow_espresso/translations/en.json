@@ -1,0 +1,30 @@
+{
+  "config": {
+    "step": {
+      "user": {
+        "title": "Fellow Espresso Series 1",
+        "description": "Log in with your Fellow account.",
+        "data": { "email": "Email", "password": "Password" }
+      },
+      "pick": {
+        "title": "Choose machine",
+        "data": { "device_id": "Machine" }
+      },
+      "reauth_confirm": {
+        "title": "Log in again",
+        "description": "Fellow rejected the saved login. Enter your credentials again.",
+        "data": { "email": "Email", "password": "Password" }
+      }
+    },
+    "error": {
+      "auth": "Wrong email or password.",
+      "cannot_connect": "Could not reach Fellow's servers.",
+      "no_devices": "No Espresso Series 1 was found on this account.",
+      "unknown": "Unexpected error, see the log."
+    },
+    "abort": {
+      "already_configured": "This machine is already set up.",
+      "reauth_successful": "Login updated."
+    }
+  }
+}

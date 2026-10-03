@@ -1,0 +1,13 @@
+{
+  "domain": "fellow_espresso",
+  "name": "Fellow Espresso Series 1",
+  "codeowners": [
+    "@thomas70"
+  ],
+  "config_flow": true,
+  "documentation": "https://github.com/thomas70/ha-fellow-espresso",
+  "iot_class": "cloud_polling",
+  "issue_tracker": "https://github.com/thomas70/ha-fellow-espresso/issues",
+  "requirements": [],
+  "version": "0.1.0"
+}
