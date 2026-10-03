@@ -136,3 +136,17 @@ async def test_unknown_builtin_is_kept_as_option(hass):
     assert opts["Modern Arc"] == "6_modernarc"
     dup = profile_options(PROFILES + [{"id": "z", "title": "House Blend", "roasterName": "Other"}])
     assert dup["House Blend"] == "ZWorb3ReS3" and dup["House Blend (Other)"] == "z"
+
+
+async def test_builtins_from_api_are_not_duplicated(hass):
+    from custom_components.fellow_espresso.profiles import profile_options
+    api_profiles = PROFILES + [
+        {"id": "6_modernarc", "title": "Modern arc"},
+        {"id": "5_lever", "title": "Lever"},
+    ]
+    opts = profile_options(api_profiles, {"6_modernarc"})
+    ids = list(opts.values())
+    assert len(ids) == len(set(ids)), opts
+    assert opts["Modern arc"] == "6_modernarc" and "Modern Arc" not in opts
+    assert opts["Lever"] == "5_lever"
+    assert opts["Classic 9-Bar"] == "4_classic9bar"  # still offered from fallback

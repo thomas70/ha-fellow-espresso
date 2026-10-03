@@ -41,8 +41,10 @@ def profile_options(
             name = f"{name} [{pid}]"
         options[name] = pid
 
+    # Profiles the API returns (which may include Fellow's built-ins, with their
+    # official titles) win over the local fallback names.
     account_ids = {p.get("id") for p in profiles}
-    builtin_ids = list(BUILTIN_PROFILES)
+    builtin_ids = [pid for pid in BUILTIN_PROFILES if pid not in account_ids]
     for pid in sorted(seen_ids or ()):
         if pid not in builtin_ids and pid not in account_ids:
             builtin_ids.append(pid)
