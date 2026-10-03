@@ -21,7 +21,7 @@ async def async_setup_entry(
 ) -> None:
     c = entry.runtime_data
     async_add_entities(
-        [ConnectedSensor(c), FirmwareUpgradeSensor(c), MissingWaterSensor(c)]
+        [ConnectedSensor(c), FirmwareUpgradeSensor(c)]
     )
 
 
@@ -50,18 +50,3 @@ class FirmwareUpgradeSensor(FellowEspressoEntity, BinarySensorEntity):
     def is_on(self) -> bool | None:
         return self.device.get("firmwareUpgradeRequired")
 
-
-class MissingWaterSensor(FellowEspressoEntity, BinarySensorEntity):
-    """The API reported null for this while idle; may populate when empty."""
-
-    _attr_name = "Water tank empty"
-    _attr_device_class = BinarySensorDeviceClass.PROBLEM
-    _attr_icon = "mdi:water-off"
-
-    def __init__(self, coordinator: FellowEspressoCoordinator) -> None:
-        super().__init__(coordinator, "missing_water")
-
-    @property
-    def is_on(self) -> bool | None:
-        value = self.device.get("missingWater")
-        return None if value is None else bool(value)

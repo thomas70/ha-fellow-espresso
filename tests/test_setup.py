@@ -80,7 +80,7 @@ async def test_entities(hass):
     assert active.attributes["dose"] == 18
     assert states["sensor.espresso_series_1_profiles"].state == "1"
     assert states["binary_sensor.espresso_series_1_connected"].state == "on"
-    assert states["binary_sensor.espresso_series_1_water_tank_empty"].state == "unknown"
+    assert "binary_sensor.espresso_series_1_water_tank_empty" not in states
 
     assert await hass.config_entries.async_unload(entry.entry_id)
 

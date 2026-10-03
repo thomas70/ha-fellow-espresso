@@ -30,7 +30,6 @@ restart Home Assistant and add the integration as in step 4.
 | Active profile | `activeProfileId` | Profile title, with dose/ratio/temp/grind as attributes. Built-in profiles shown by name |
 | Profiles | `/profiles` | Number of profiles; full list as an attribute |
 | Connected | `isConnected` | Whether the machine is online in Fellow's cloud |
-| Water tank empty | `missingWater` | Was `null` while idle; may populate when the tank is empty |
 | Firmware upgrade required | `firmwareUpgradeRequired` | |
 | Total descales / backflushes / shower cleans | `total*Count` | Diagnostic |
 | Water hardness, Firmware, Auto stop, Preheat | settings | Diagnostic |
@@ -56,6 +55,9 @@ The machine reports `schedules` and `remoteBrewing` in `enabledFlags`, but those
 endpoints are not mapped yet. Preheat and schedules may go over AWS IoT (MQTT)
 rather than this HTTP API. Capturing the Fellow app's traffic (e.g. with mimic
 or mitmproxy) while using those features would show which.
+
+The API has a `missingWater` field, but it stays `null` even with an empty tank,
+so there is no water tank sensor.
 
 Built-in profiles do not appear in the profiles endpoint. The ones seen so far
 are listed in `profiles.py`; any other built-in id the machine reports as active
