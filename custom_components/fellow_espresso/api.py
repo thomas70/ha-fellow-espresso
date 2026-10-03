@@ -1,16 +1,19 @@
 """Minimal async client for the Fellow cloud API (Espresso Series 1 / "Solo").
 
-Read-only endpoints confirmed working for deviceType "Solo":
+Endpoints confirmed working for deviceType "Solo":
   POST /auth/login                   -> {accessToken, refreshToken} (HTTP 201)
   POST /auth/refresh-token           -> {accessToken[, refreshToken]}
   GET  /devices?dataType=real        -> list of all devices on the account
   GET  /solo/devices/{id}            -> device state/settings
   GET  /solo/devices/{id}/profiles   -> espresso profiles
+  PATCH /solo/devices/{id}/active-profile
+        {"profileId": "...", "settingsVersion": <unix seconds>} -> 204
 """
 from __future__ import annotations
 
 import asyncio
 import logging
+import time
 from typing import Any
 
 import aiohttp
@@ -116,26 +119,32 @@ class FellowEspressoApi:
         self._refresh_token = data.get("refreshToken", self._refresh_token)
         return True
 
-    async def _get(self, path: str) -> Any:
+    async def _call(self, method: str, path: str, **kwargs: Any) -> Any:
+        """Authenticated request; refreshes or re-logs in once on HTTP 401."""
         async with self._lock:
             if not self._token:
                 await self.login()
-        status, data = await self._raw("get", path, params={"dataType": "real"})
+        status, data = await self._raw(method, path, **kwargs)
         if status == 401:
             async with self._lock:
                 refreshed = await self._refresh()
                 if not refreshed:
                     await self.login()
-            status, data = await self._raw("get", path, params={"dataType": "real"})
+            status, data = await self._raw(method, path, **kwargs)
             if status == 401 and refreshed:
                 async with self._lock:
                     await self.login()
-                status, data = await self._raw("get", path, params={"dataType": "real"})
+                status, data = await self._raw(method, path, **kwargs)
         if status == 401:
             raise FellowAuthError("Not authorized")
         if not 200 <= status < 300:
-            raise FellowConnectionError(f"GET {path} failed: HTTP {status}")
+            raise FellowConnectionError(
+                f"{method.upper()} {path} failed: HTTP {status}: {data}"
+            )
         return data
+
+    async def _get(self, path: str) -> Any:
+        return await self._call("get", path, params={"dataType": "real"})
 
     # -- endpoints -------------------------------------------------------
 
@@ -162,3 +171,14 @@ class FellowEspressoApi:
         if not isinstance(data, list):
             return []
         return [p for p in data if isinstance(p, dict) and not p.get("deletedAt")]
+
+    async def set_active_profile(self, device_id: str, profile_id: str) -> None:
+        """Switch the machine's active profile, as the Fellow app does.
+
+        The app sends the current Unix time (seconds) as settingsVersion.
+        """
+        await self._call(
+            "patch",
+            f"/solo/devices/{device_id}/active-profile",
+            json={"profileId": profile_id, "settingsVersion": int(time.time())},
+        )

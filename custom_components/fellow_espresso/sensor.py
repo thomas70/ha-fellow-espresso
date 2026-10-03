@@ -130,11 +130,7 @@ class ActiveProfileSensor(FellowEspressoEntity, SensorEntity):
 
     @property
     def native_value(self) -> str | None:
-        profile = self.coordinator.active_profile()
-        if profile:
-            return profile.get("title")
-        # Built-in profiles (e.g. "6_modernarc") are not in the profile list.
-        return self.device.get("activeProfileId")
+        return self.coordinator.active_profile_name()
 
     @property
     def extra_state_attributes(self) -> dict[str, Any]:

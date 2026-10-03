@@ -1,6 +1,6 @@
 # Fellow Espresso Series 1 for Home Assistant
 
-Unofficial, read-only integration for the Fellow Espresso Series 1 (ES1), using
+Unofficial integration for the Fellow Espresso Series 1 (ES1), using
 Fellow's cloud API. It polls every 60 seconds and runs alongside the Fellow
 Aiden integration without conflict (separate domain: `fellow_espresso`).
 
@@ -26,7 +26,8 @@ restart Home Assistant and add the integration as in step 4.
 | Descale remaining | `descaleRem` | Countdown to next descale |
 | Backflush remaining | `backflushRem` | Countdown to next backflush |
 | Shower screen clean remaining | `showerRem` | Countdown to next shower screen clean |
-| Active profile | `activeProfileId` | Profile title, with dose/ratio/temp/grind as attributes. Built-in profiles show their id |
+| **Profile** (select) | `PATCH /active-profile` | Switch the active profile: built-in ones (Classic 9-Bar, Lever, Modern Arc) and your own/Drops profiles |
+| Active profile | `activeProfileId` | Profile title, with dose/ratio/temp/grind as attributes. Built-in profiles shown by name |
 | Profiles | `/profiles` | Number of profiles; full list as an attribute |
 | Connected | `isConnected` | Whether the machine is online in Fellow's cloud |
 | Water tank empty | `missingWater` | Was `null` while idle; may populate when the tank is empty |
@@ -42,13 +43,18 @@ All against `https://l8qtmnc692.execute-api.us-west-2.amazonaws.com/v2`:
 - `GET /devices?dataType=real`, filtered on `deviceType == "Solo"`
 - `GET /solo/devices/{id}`
 - `GET /solo/devices/{id}/profiles`
+- `PATCH /solo/devices/{id}/active-profile` with `{"profileId": "...", "settingsVersion": <current Unix time in seconds>}` (returns 204)
 
 ## Not yet supported
 
 The machine reports `schedules` and `remoteBrewing` in `enabledFlags`, but those
-endpoints, plus changing the active profile, are not mapped yet. Capturing the
-Fellow app's traffic (e.g. with mimic or mitmproxy) while using those features
-would reveal them.
+endpoints are not mapped yet. Preheat and schedules may go over AWS IoT (MQTT)
+rather than this HTTP API. Capturing the Fellow app's traffic (e.g. with mimic
+or mitmproxy) while using those features would show which.
+
+Built-in profiles do not appear in the profiles endpoint. The ones seen so far
+are listed in `profiles.py`; any other built-in id the machine reports as active
+is added to the selector automatically (with a name derived from the id).
 
 ## Tests
 

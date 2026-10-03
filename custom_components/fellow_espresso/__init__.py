@@ -9,7 +9,7 @@ from homeassistant.helpers.aiohttp_client import async_get_clientsession
 from .api import FellowEspressoApi
 from .coordinator import FellowEspressoCoordinator
 
-PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR]
+PLATFORMS = [Platform.SENSOR, Platform.BINARY_SENSOR, Platform.SELECT]
 
 type FellowEspressoConfigEntry = ConfigEntry[FellowEspressoCoordinator]
 

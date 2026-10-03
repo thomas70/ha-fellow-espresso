@@ -83,3 +83,53 @@ async def test_entities(hass):
     assert states["binary_sensor.espresso_series_1_water_tank_empty"].state == "unknown"
 
     assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_profile_select(hass):
+    entry = MockConfigEntry(
+        domain=DOMAIN, unique_id="FS_x",
+        data={CONF_EMAIL: "a@b.c", CONF_PASSWORD: "pw", CONF_DEVICE_ID: "FS_x"},
+    )
+    entry.add_to_hass(hass)
+    dev = {**DEV, "activeProfileId": "6_modernarc"}
+    set_profile = AsyncMock()
+    with patch(f"{API}.login", AsyncMock()), patch(
+        f"{API}.get_device", AsyncMock(return_value=dev)
+    ), patch(f"{API}.get_profiles", AsyncMock(return_value=PROFILES)), patch(
+        f"{API}.set_active_profile", set_profile
+    ):
+        assert await hass.config_entries.async_setup(entry.entry_id)
+        await hass.async_block_till_done()
+
+        sel = hass.states.get("select.espresso_series_1_profile")
+        print("options:", sel.attributes["options"], "current:", sel.state)
+        assert sel.state == "Modern Arc"
+        assert sel.attributes["options"][:3] == ["Classic 9-Bar", "Lever", "Modern Arc"]
+        assert "House Blend" in sel.attributes["options"]
+        assert hass.states.get("sensor.espresso_series_1_active_profile").state == "Modern Arc"
+
+        await hass.services.async_call(
+            "select", "select_option",
+            {"entity_id": "select.espresso_series_1_profile", "option": "House Blend"},
+            blocking=True,
+        )
+        set_profile.assert_awaited_once_with("FS_x", "ZWorb3ReS3")
+        assert hass.states.get("select.espresso_series_1_profile").state == "House Blend"
+        assert hass.states.get("sensor.espresso_series_1_active_profile").state == "House Blend"
+
+        await hass.services.async_call(
+            "select", "select_option",
+            {"entity_id": "select.espresso_series_1_profile", "option": "Lever"},
+            blocking=True,
+        )
+        set_profile.assert_awaited_with("FS_x", "5_lever")
+    assert await hass.config_entries.async_unload(entry.entry_id)
+
+
+async def test_unknown_builtin_is_kept_as_option(hass):
+    from custom_components.fellow_espresso.profiles import profile_options
+    opts = profile_options(PROFILES, {"1_lightroast", "6_modernarc"})
+    assert opts["Lightroast"] == "1_lightroast"
+    assert opts["Modern Arc"] == "6_modernarc"
+    dup = profile_options(PROFILES + [{"id": "z", "title": "House Blend", "roasterName": "Other"}])
+    assert dup["House Blend"] == "ZWorb3ReS3" and dup["House Blend (Other)"] == "z"
