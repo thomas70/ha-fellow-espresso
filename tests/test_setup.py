@@ -73,8 +73,11 @@ async def test_entities(hass):
     states = {s.entity_id: s for s in hass.states.async_all()}
     for eid, s in sorted(states.items()):
         print(eid, "=", s.state)
-    assert states["sensor.espresso_series_1_descale_remaining"].state == "200"
-    assert states["sensor.espresso_series_1_backflush_remaining"].state == "60"
+    descale = states["sensor.espresso_series_1_descale_interval"]
+    assert descale.state == "200" and descale.attributes["unit_of_measurement"] == "drinks"
+    backflush = states["sensor.espresso_series_1_backflush_interval"]
+    assert backflush.state == "60" and backflush.attributes["unit_of_measurement"] == "shots"
+    assert states["sensor.espresso_series_1_shower_screen_clean_interval"].state == "180"
     active = states["sensor.espresso_series_1_active_profile"]
     assert active.state == "House Blend"
     assert active.attributes["dose"] == 18

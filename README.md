@@ -23,9 +23,9 @@ restart Home Assistant and add the integration as in step 4.
 
 | Entity | Source field | Notes |
 | --- | --- | --- |
-| Descale remaining | `descaleRem` | Countdown to next descale |
-| Backflush remaining | `backflushRem` | Countdown to next backflush |
-| Shower screen clean remaining | `showerRem` | Countdown to next shower screen clean |
+| Descale interval | `descaleRem` | Configured interval, e.g. every 200 drinks (diagnostic) |
+| Backflush interval | `backflushRem` | Configured interval, e.g. every 60 shots (diagnostic) |
+| Shower screen clean interval | `showerRem` | Configured interval (diagnostic) |
 | **Profile** (select) | `PATCH /active-profile` | Switch the active profile: built-in ones (Classic 9-Bar, Lever, Modern Arc) and your own/Drops profiles |
 | Active profile | `activeProfileId` | Profile title, with dose/ratio/temp/grind as attributes. Built-in profiles shown by name |
 | Profiles | `/profiles` | Number of profiles; full list as an attribute |
@@ -55,6 +55,11 @@ The machine reports `schedules` and `remoteBrewing` in `enabledFlags`, but those
 endpoints are not mapped yet. Preheat and schedules may go over AWS IoT (MQTT)
 rather than this HTTP API. Capturing the Fellow app's traffic (e.g. with mimic
 or mitmproxy) while using those features would show which.
+
+Despite their names, `descaleRem`, `backflushRem` and `showerRem` are the
+*intervals* set on the machine (Maintenance → Cleaning interval), not countdowns.
+The machine's progress toward them (e.g. "33/200 drinks") is not sent to the
+cloud, so maintenance-due alerts are not possible yet.
 
 The API has a `missingWater` field, but it stays `null` even with an empty tank,
 so there is no water tank sensor.

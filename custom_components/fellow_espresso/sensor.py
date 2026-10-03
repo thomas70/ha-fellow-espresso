@@ -29,20 +29,25 @@ def _field(name: str) -> Callable[[dict[str, Any]], Any]:
 
 
 SENSORS: tuple[FellowSensorDescription, ...] = (
-    # Maintenance countdowns (as reported by the machine; likely shots remaining)
+    # Maintenance intervals as configured on the machine (Settings → Maintenance
+    # → Cleaning interval). The machine's progress toward them (e.g. 33/200)
+    # is not sent to Fellow's cloud.
     FellowSensorDescription(
-        key="descale_remaining", name="Descale remaining",
-        icon="mdi:water-alert", state_class=SensorStateClass.MEASUREMENT,
+        key="descale_interval", name="Descale interval",
+        icon="mdi:water-alert", native_unit_of_measurement="drinks",
+        entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=_field("descaleRem"),
     ),
     FellowSensorDescription(
-        key="backflush_remaining", name="Backflush remaining",
-        icon="mdi:backup-restore", state_class=SensorStateClass.MEASUREMENT,
+        key="backflush_interval", name="Backflush interval",
+        icon="mdi:backup-restore", native_unit_of_measurement="shots",
+        entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=_field("backflushRem"),
     ),
     FellowSensorDescription(
-        key="shower_remaining", name="Shower screen clean remaining",
-        icon="mdi:shower-head", state_class=SensorStateClass.MEASUREMENT,
+        key="shower_interval", name="Shower screen clean interval",
+        icon="mdi:shower-head",
+        entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=_field("showerRem"),
     ),
     # Lifetime counters
