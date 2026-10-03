@@ -31,7 +31,7 @@ restart Home Assistant and add the integration as in step 4.
 | Profiles | `/profiles` | Number of profiles; full list as an attribute |
 | Connected | `isConnected` | Whether the machine is online in Fellow's cloud |
 | Firmware upgrade required | `firmwareUpgradeRequired` | |
-| Total descales / backflushes / shower cleans | `total*Count` | Diagnostic |
+| Total descales / backflushes / shower cleans | `total*Count` | Completed maintenance runs; confirmed to update after a backflush (diagnostic) |
 | Water hardness, Firmware, Auto stop, Preheat | settings | Diagnostic |
 
 ## Icon
