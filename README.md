@@ -35,6 +35,11 @@ restart Home Assistant and add the integration as in step 4.
 | Total descales / backflushes / shower cleans | `total*Count` | Diagnostic |
 | Water hardness, Firmware, Auto stop, Preheat | settings | Diagnostic |
 
+## Icon
+
+The integration ships its own icon in `custom_components/fellow_espresso/brand/`
+(light and dark variants). Home Assistant 2026.3 or newer shows it automatically.
+
 ## API endpoints used
 
 All against `https://l8qtmnc692.execute-api.us-west-2.amazonaws.com/v2`:
