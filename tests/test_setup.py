@@ -89,6 +89,8 @@ async def test_entities(hass):
     assert len(active.attributes["notes"]) > 255
     assert active.attributes["rampDownEndPressure"] == 6
     assert active.attributes["transition"] == "smooth"
+    listed = states["sensor.espresso_series_1_profiles"].attributes["profiles"]
+    assert listed[0]["notes"].startswith("A long pre-infusion")
     active = states["sensor.espresso_series_1_active_profile"]
     assert active.state == "House Blend"
     assert active.attributes["dose"] == 18

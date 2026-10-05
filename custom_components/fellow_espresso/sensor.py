@@ -170,6 +170,9 @@ class ProfilesSensor(FellowEspressoEntity, SensorEntity):
     _attr_name = "Profiles"
     _attr_icon = "mdi:format-list-bulleted"
     _attr_state_class = SensorStateClass.MEASUREMENT
+    # The list holds every profile's notes (several kB); keep it out of the
+    # recorder database so it isn't stored again on every update.
+    _unrecorded_attributes = frozenset({"profiles"})
 
     def __init__(self, coordinator: FellowEspressoCoordinator) -> None:
         super().__init__(coordinator, "profiles")
@@ -191,6 +194,7 @@ class ProfilesSensor(FellowEspressoEntity, SensorEntity):
                     "ratio": p.get("ratio"),
                     "temperature": p.get("temperature"),
                     "grind_size": p.get("grindSize"),
+                    "notes": p.get("notes"),
                 }
                 for p in profiles
             ]
