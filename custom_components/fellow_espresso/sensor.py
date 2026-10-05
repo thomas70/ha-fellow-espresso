@@ -90,12 +90,32 @@ SENSORS: tuple[FellowSensorDescription, ...] = (
         entity_category=EntityCategory.DIAGNOSTIC,
         value_fn=_field("preheat"),
     ),
+    FellowSensorDescription(
+        key="group_rinse", name="Group rinse", icon="mdi:water-sync",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_field("groupRinse"),
+    ),
+    FellowSensorDescription(
+        key="chime", name="Chime", icon="mdi:bell-ring-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_field("chime"),
+    ),
+    FellowSensorDescription(
+        key="brew_guidance", name="Brew guidance", icon="mdi:information-outline",
+        entity_category=EntityCategory.DIAGNOSTIC,
+        value_fn=_field("brewGuidance"),
+    ),
 )
 
 PROFILE_ATTRS = (
     "roasterName", "dose", "ratio", "temperature", "grindSize",
     "preInfusionEnabled", "preInfusionDuration", "preInfusionHoldPressure",
-    "infusion", "rampDownEnabled", "adaptive", "folder",
+    "preInfusionFillFlowRate", "infusion", "transition", "decliningTemp",
+    "rampDownEnabled", "rampDownEndPressure", "rampDownDuration",
+    "adaptive", "folder",
+    # The profile's description of the shot; often longer than the 255
+    # characters a state can hold, so it is an attribute.
+    "notes",
 )
 
 

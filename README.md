@@ -31,12 +31,26 @@ restart Home Assistant and add the integration as in step 4.
 | Backflush interval | `backflushRem` | Configured interval, e.g. every 60 shots (diagnostic) |
 | Shower screen clean interval | `showerRem` | Configured interval (diagnostic) |
 | **Profile** (select) | `PATCH /active-profile` | Switch the active profile: Fellow's built-in profiles (Light/Medium/Dark roast, Classic 9 bar, Lever, Modern arc, Turbo shot) and your Drops profiles |
-| Active profile | `activeProfileId` | Profile name, with dose/ratio/temp/grind as attributes |
+| Active profile | `activeProfileId` | Profile name. Attributes: dose, ratio, temperature, grind, pre-infusion, infusion steps, ramp-down, transition, declining temp, and `notes` (the profile's description of the shot) |
 | Profiles | `/profiles` | Number of profiles; full list as an attribute |
 | Connected | `isConnected` | Whether the machine is online in Fellow's cloud |
 | Firmware upgrade required | `firmwareUpgradeRequired` | |
 | Total descales / backflushes / shower cleans | `total*Count` | Completed maintenance runs; confirmed to update after a backflush (diagnostic) |
 | Water hardness, Firmware, Auto stop, Preheat | settings | Diagnostic |
+| Group rinse, Chime, Brew guidance | `groupRinse`, `chime`, `brewGuidance` | Diagnostic, values as reported by the machine |
+
+### Showing the shot description
+
+`notes` is often longer than the 255 characters a sensor state can hold, so it
+is an attribute on **Active profile**. A Markdown card shows it and follows
+profile changes:
+
+```yaml
+type: markdown
+content: >
+  ### {{ states('sensor.espresso_series_1_active_profile') }}
+  {{ state_attr('sensor.espresso_series_1_active_profile', 'notes') }}
+```
 
 ## Icon
 

@@ -14,10 +14,12 @@ DEV = {
     "showerRem": 180, "totalDescaleCount": 0, "activeProfileId": "ZWorb3ReS3",
     "firmwareVersion": "2.5.15", "firmwareUpgradeRequired": False,
     "missingWater": None, "waterHardness": 2.5, "autoStop": "volume",
-    "preheat": "Default",
+    "preheat": "Default", "groupRinse": 5, "chime": "high", "brewGuidance": "on",
 }
 PROFILES = [{"id": "ZWorb3ReS3", "title": "House Blend", "roasterName": "Honey Moon",
-             "dose": 18, "ratio": 2, "temperature": 93.5, "grindSize": 1.2}]
+             "dose": 18, "ratio": 2, "temperature": 93.5, "grindSize": 1.2,
+             "rampDownEndPressure": 6, "transition": "smooth",
+             "notes": "A long pre-infusion, then 9 bar. " * 20}]
 API = "custom_components.fellow_espresso.api.FellowEspressoApi"
 
 
@@ -78,6 +80,15 @@ async def test_entities(hass):
     backflush = states["sensor.espresso_series_1_backflush_interval"]
     assert backflush.state == "60" and backflush.attributes["unit_of_measurement"] == "shots"
     assert states["sensor.espresso_series_1_shower_screen_clean_interval"].state == "180"
+    assert states["sensor.espresso_series_1_group_rinse"].state == "5"
+    assert states["sensor.espresso_series_1_chime"].state == "high"
+    assert states["sensor.espresso_series_1_brew_guidance"].state == "on"
+    active = states["sensor.espresso_series_1_active_profile"]
+    assert active.state == "House Blend"
+    assert active.attributes["notes"].startswith("A long pre-infusion")
+    assert len(active.attributes["notes"]) > 255
+    assert active.attributes["rampDownEndPressure"] == 6
+    assert active.attributes["transition"] == "smooth"
     active = states["sensor.espresso_series_1_active_profile"]
     assert active.state == "House Blend"
     assert active.attributes["dose"] == 18
