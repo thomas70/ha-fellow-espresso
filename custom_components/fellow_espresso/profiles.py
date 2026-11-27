@@ -16,10 +16,20 @@ BUILTIN_PROFILES: dict[str, str] = {
 }
 
 
+def is_builtin_id(profile_id: str) -> bool:
+    """Built-in ids look like "4_classic9bar"; account profile ids do not."""
+    return re.match(r"\d+_", profile_id) is not None
+
+
 def builtin_name(profile_id: str) -> str:
-    """Readable name for a built-in profile id."""
+    """Readable name for a built-in profile id.
+
+    Any other id is returned unchanged rather than turned into a made-up name.
+    """
     if profile_id in BUILTIN_PROFILES:
         return BUILTIN_PROFILES[profile_id]
+    if not is_builtin_id(profile_id):
+        return profile_id
     slug = re.sub(r"^\d+_", "", profile_id)
     return slug.replace("_", " ").replace("-", " ").title() or profile_id
 
@@ -46,7 +56,7 @@ def profile_options(
     account_ids = {p.get("id") for p in profiles}
     builtin_ids = [pid for pid in BUILTIN_PROFILES if pid not in account_ids]
     for pid in sorted(seen_ids or ()):
-        if pid not in builtin_ids and pid not in account_ids:
+        if is_builtin_id(pid) and pid not in builtin_ids and pid not in account_ids:
             builtin_ids.append(pid)
     for pid in builtin_ids:
         add(builtin_name(pid), pid, None)

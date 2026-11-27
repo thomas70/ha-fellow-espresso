@@ -28,6 +28,7 @@
       "auth": "Feil e-post eller passord.",
       "cannot_connect": "Fikk ikke kontakt med Fellows servere.",
       "no_devices": "Fant ingen Espresso Series 1 på denne kontoen.",
+      "wrong_account": "Denne kontoen har ikke maskinen som allerede er satt opp.",
       "unknown": "Uventet feil, se loggen."
     },
     "abort": {

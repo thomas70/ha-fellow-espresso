@@ -88,15 +88,23 @@ class FellowEspressoConfigFlow(ConfigFlow, domain=DOMAIN):
         entry = self._get_reauth_entry()
         if user_input is not None:
             try:
-                await self._fetch_devices(user_input[CONF_EMAIL], user_input[CONF_PASSWORD])
+                devices = await self._fetch_devices(
+                    user_input[CONF_EMAIL], user_input[CONF_PASSWORD]
+                )
             except FellowAuthError:
                 errors["base"] = "auth"
             except FellowConnectionError:
                 errors["base"] = "cannot_connect"
+            except Exception:  # noqa: BLE001
+                _LOGGER.exception("Unexpected error during login")
+                errors["base"] = "unknown"
             else:
-                return self.async_update_reload_and_abort(
-                    entry, data_updates=user_input
-                )
+                if entry.data[CONF_DEVICE_ID] not in {d.get("id") for d in devices}:
+                    errors["base"] = "wrong_account"
+                else:
+                    return self.async_update_reload_and_abort(
+                        entry, data_updates=user_input
+                    )
         return self.async_show_form(
             step_id="reauth_confirm",
             data_schema=self.add_suggested_values_to_schema(
