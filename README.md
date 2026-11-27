@@ -52,6 +52,21 @@ content: >
   {{ state_attr('sensor.espresso_series_1_active_profile', 'notes') }}
 ```
 
+## Refreshing profiles
+
+The profile list is fetched when the active profile changes, when the machine's
+record shows that one of your custom profiles was added, edited or removed
+(checked on every poll), and otherwise about every 10 minutes. How soon the
+record reflects a change is up to Fellow's service. To fetch the list straight
+away, for example after adding a Drops profile, run the
+`homeassistant.update_entity` action on any of this integration's entities:
+
+```yaml
+action: homeassistant.update_entity
+data:
+  entity_id: sensor.espresso_series_1_profiles
+```
+
 ## Icon
 
 The integration ships its own icon in `custom_components/fellow_espresso/brand/`

@@ -12,11 +12,31 @@ from homeassistant.helpers.update_coordinator import DataUpdateCoordinator, Upda
 
 from .api import FellowAuthError, FellowError, FellowEspressoApi
 from .const import CONF_DEVICE_ID, DEFAULT_SCAN_INTERVAL, DOMAIN
-from .profiles import builtin_name, profile_options
+from .profiles import BUILTIN_PROFILES, builtin_name, profile_options
 
 _LOGGER = logging.getLogger(__name__)
 
-PROFILE_REFRESH_EVERY = 10  # fetch profiles every Nth poll
+PROFILE_REFRESH_EVERY = 10  # fetch profiles at least every Nth poll
+# Fetches after a change while the list still lags behind the machine record.
+PROFILE_CATCH_UP_TRIES = 3
+
+
+def _custom_profile_stamps(device: dict[str, Any]) -> frozenset[tuple[str, str]]:
+    """(id, settingsVersion) of the custom profiles held in the machine record.
+
+    The record is polled every time, and an edited, added or removed custom
+    profile shows up here without fetching the profile list.
+    """
+    profiles = device.get("profiles")
+    if not isinstance(profiles, list):
+        return frozenset()
+    return frozenset(
+        (p["id"], str(p.get("settingsVersion")))
+        for p in profiles
+        if isinstance(p, dict)
+        and isinstance(p.get("id"), str)
+        and not p.get("deletedAt")
+    )
 
 
 class FellowEspressoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
@@ -34,25 +54,71 @@ class FellowEspressoCoordinator(DataUpdateCoordinator[dict[str, Any]]):
         )
         self.api = api
         self.device_id: str = entry.data[CONF_DEVICE_ID]
-        self._polls = 0
         self._profiles: list[dict[str, Any]] = []
+        self._polls_since_profiles = 0
+        self._force_profiles = False
+        # Active profile id and custom profile stamps at the last good poll.
+        self._last_seen: tuple[str | None, frozenset[tuple[str, str]]] | None = None
+        self._catch_up_tries = 0
         # Built-in profile ids seen as active (they are not in the profile list).
         self.seen_profile_ids: set[str] = set()
 
     async def _async_update_data(self) -> dict[str, Any]:
         try:
             device = await self.api.get_device(self.device_id)
-            if self._polls % PROFILE_REFRESH_EVERY == 0 or not self._profiles:
+            active_id = device.get("activeProfileId")
+            stamps = _custom_profile_stamps(device)
+            self._polls_since_profiles += 1
+            changed = (active_id, stamps) != self._last_seen
+            if changed:
+                self._catch_up_tries = 0
+            if self._profiles_due(active_id, stamps, changed):
                 self._profiles = await self.api.get_profiles(self.device_id)
+                self._polls_since_profiles = 0
+                self._force_profiles = False
+                if self._is_behind(active_id, stamps):
+                    self._catch_up_tries += 1
         except FellowAuthError as err:
             raise ConfigEntryAuthFailed(str(err)) from err
         except FellowError as err:
             raise UpdateFailed(str(err)) from err
-        self._polls += 1
-        active_id = device.get("activeProfileId")
+        # Only after a successful poll, so a failed profile fetch is retried.
+        self._last_seen = (active_id, stamps)
         if active_id:
             self.seen_profile_ids.add(active_id)
         return {"device": device, "profiles": self._profiles}
+
+    def _profiles_due(
+        self,
+        active_id: str | None,
+        stamps: frozenset[tuple[str, str]],
+        changed: bool,
+    ) -> bool:
+        """Whether this poll should also fetch the profile list."""
+        return (
+            not self._profiles
+            or self._force_profiles
+            or changed
+            or self._polls_since_profiles >= PROFILE_REFRESH_EVERY
+            or (
+                self._catch_up_tries < PROFILE_CATCH_UP_TRIES
+                and self._is_behind(active_id, stamps)
+            )
+        )
+
+    def _is_behind(
+        self, active_id: str | None, stamps: frozenset[tuple[str, str]]
+    ) -> bool:
+        """Whether the cached list lacks something the machine record shows."""
+        listed = {p.get("id"): str(p.get("settingsVersion")) for p in self._profiles}
+        if active_id and active_id not in BUILTIN_PROFILES and active_id not in listed:
+            return True
+        return any(listed.get(pid) != version for pid, version in stamps)
+
+    async def async_request_refresh(self) -> None:
+        """Manual refresh (homeassistant.update_entity): fetch profiles too."""
+        self._force_profiles = True
+        await super().async_request_refresh()
 
     def active_profile(self) -> dict[str, Any] | None:
         data = self.data or {}
