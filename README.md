@@ -86,8 +86,8 @@ so there is no water tank sensor.
 
 The profiles endpoint may also return Fellow's built-in profiles; their API
 titles are used when present. `profiles.py` holds fallback names for built-in
-ids seen so far, and any other id the machine reports as active is added to the
-selector automatically.
+ids seen so far, and any other built-in id the machine reports as active is
+added to the selector automatically.
 
 ## Tests
 
