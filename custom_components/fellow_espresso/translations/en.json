@@ -20,6 +20,7 @@
       "auth": "Wrong email or password.",
       "cannot_connect": "Could not reach Fellow's servers.",
       "no_devices": "No Espresso Series 1 was found on this account.",
+      "wrong_account": "This account does not have the machine that is already set up.",
       "unknown": "Unexpected error, see the log."
     },
     "abort": {
